@@ -1,0 +1,36 @@
+---
+kind: pipeline
+name: default
+
+steps:
+  - name: Bump and tag
+    image: golang:1.14
+    environment:
+      GITHUB_API_KEY:
+        from_secret: github_api_key
+      GITHUB_API_USER:
+        from_secret: github_api_user
+    commands:
+      - git config --global user.name "Kite Bot"
+      - git config --global user.email "kite-bot@heliostech.fr"
+      - go get github.com/guilhem/bump
+      - git remote add authenticated-origin https://$GITHUB_API_USER:$GITHUB_API_KEY@github.com/$DRONE_REPO
+      - git fetch --tags authenticated-origin
+      - bump patch --allow-dirty > .tags
+      - git push authenticated-origin --tags
+
+  - name: Build container
+    image: plugins/docker
+    settings:
+      username:
+        from_secret: quay_username
+      password:
+        from_secret: quay_password
+      repo: quay.io/openware/rango
+      registry: quay.io
+
+trigger:
+  event:
+    - push
+  branch:
+    - master
