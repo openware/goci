@@ -13,7 +13,7 @@ RUN go build --ldflags "-X main.Version=$(cat .tags)" -o /build/goci ./cmd/goci
 
 FROM alpine:3.9
 
-RUN apk add ca-certificates
+RUN apk add git
 WORKDIR app
 COPY --from=builder /build/goci ./
 
