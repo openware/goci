@@ -33,6 +33,12 @@ type AuthToken struct {
 	Token    string
 }
 
+func checkIfErr(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 // Method implementation of AuthToken
 func (a *AuthToken) Method() transport.AuthMethod {
 	return &http.BasicAuth{
@@ -43,9 +49,34 @@ func (a *AuthToken) Method() transport.AuthMethod {
 
 // Clone repository with config
 func Clone(cnf *Config, auth Auth, outDir string) (*git.Repository, error) {
-	return git.PlainClone(outDir, false, &git.CloneOptions{
+	repo, err := git.PlainClone(outDir, false, &git.CloneOptions{
 		Auth:     auth.Method(),
 		URL:      cnf.Repo,
 		Progress: os.Stdout,
+	})
+	cfg, _ := repo.Config()
+	cfg.User.Name = cnf.Username
+	cfg.User.Email = cnf.Email
+	repo.SetConfig(cfg)
+	return repo, err
+}
+
+// Bump for git add, commit and push
+func Bump(repo *git.Repository, auth Auth, msg string) (hash string, err error) {
+	// worktree of the project using the go standard library
+	w, err := repo.Worktree()
+	checkIfErr(err)
+
+	// Adds the new file to the staging area
+	_, err = w.Add(".")
+	checkIfErr(err)
+
+	// Commits the current staging area to the repository, with the new file
+	cmt, err := w.Commit(msg, &git.CommitOptions{})
+	checkIfErr(err)
+
+	// Push using default options
+	return cmt.String(), repo.Push(&git.PushOptions{
+		Auth: auth.Method(),
 	})
 }

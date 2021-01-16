@@ -28,9 +28,6 @@ func main() {
 	cli.StringFlag("tag", "Tag to insert into the versions file", &Tag)
 	cli.AddCommand(cmdVersions)
 
-	cmdClone := kli.NewCommand("clone", "Clone component repository").Action(actionClone)
-	cli.AddCommand(cmdClone)
-
 	if err := cli.Run(); err != nil {
 		fmt.Printf("Error encountered: %v\n", err)
 		os.Exit(1)
