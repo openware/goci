@@ -10,10 +10,10 @@ import (
 
 // Config for the git repository
 type Config struct {
-	Username string `env:"GIT_USERNAME" env-description:"Git username"`
-	Email    string `env:"GIT_EMAIL" env-description:"Git user email"`
+	Username string `env:"GIT_USERNAME" env-default:"kite-bot" env-description:"Git username"`
+	Email    string `env:"GIT_EMAIL" env-default:"kite-bot@heliostech.fr" env-description:"Git user email"`
 	Token    string `env:"GIT_TOKEN" env-description:"Git access token"`
-	Repo     string `env:"GIT_REPO" env-description:"Git repository url"`
+	Repo     string `env:"GIT_REPO" env-default:"https://github.com/openware/versions.git" env-description:"Git repository url"`
 }
 
 // Auth to describe auth method

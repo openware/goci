@@ -8,13 +8,15 @@ import (
 )
 
 func actionClone() error {
-	fmt.Println("Clone the repository")
-
 	// read configuration from the file and environment variables
 	var cnf git.Config
 	if err := ika.ReadConfig("", &cnf); err != nil {
 		panic(err)
 	}
+
+	fmt.Printf("Clone the repository `%s`\n", cnf.Repo)
+	fmt.Printf("Username: %s\n", cnf.Username)
+	fmt.Printf("Email: %s\n", cnf.Email)
 
 	auth := git.AuthToken{
 		Username: cnf.Username,
