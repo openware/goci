@@ -14,6 +14,7 @@ type Config struct {
 	Email    string `env:"GIT_EMAIL" env-default:"kite-bot@heliostech.fr" env-description:"Git user email"`
 	Token    string `env:"GIT_TOKEN" env-description:"Git access token"`
 	Repo     string `env:"GIT_REPO" env-default:"https://github.com/openware/versions.git" env-description:"Git repository url"`
+	Branch   string `env:"DRONE_BRANCH" env-default:"2-6" env-description:"Drone target branch"`
 }
 
 // Auth to describe auth method
@@ -33,12 +34,6 @@ type AuthToken struct {
 	Token    string
 }
 
-func checkIfErr(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
 // Method implementation of AuthToken
 func (a *AuthToken) Method() transport.AuthMethod {
 	return &http.BasicAuth{
@@ -54,7 +49,10 @@ func Clone(cnf *Config, auth Auth, outDir string) (*git.Repository, error) {
 		URL:      cnf.Repo,
 		Progress: os.Stdout,
 	})
-	cfg, _ := repo.Config()
+	cfg, err := repo.Config()
+	if err != nil {
+		return nil, err
+	}
 	cfg.User.Name = cnf.Username
 	cfg.User.Email = cnf.Email
 	repo.SetConfig(cfg)
@@ -65,15 +63,21 @@ func Clone(cnf *Config, auth Auth, outDir string) (*git.Repository, error) {
 func Bump(repo *git.Repository, auth Auth, msg string) (hash string, err error) {
 	// worktree of the project using the go standard library
 	w, err := repo.Worktree()
-	checkIfErr(err)
+	if err != nil {
+		return "", err
+	}
 
 	// Adds the new file to the staging area
 	_, err = w.Add(".")
-	checkIfErr(err)
+	if err != nil {
+		return "", err
+	}
 
 	// Commits the current staging area to the repository, with the new file
 	cmt, err := w.Commit(msg, &git.CommitOptions{})
-	checkIfErr(err)
+	if err != nil {
+		return "", err
+	}
 
 	// Push using default options
 	return cmt.String(), repo.Push(&git.PushOptions{

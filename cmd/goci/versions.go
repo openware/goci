@@ -16,7 +16,11 @@ func actionVersions() error {
 		panic(err)
 	}
 
-	tmp := "./tmp/"
+	tmp := "./tmp"
+	// Path to versions file
+	if Path == "" {
+		Path = fmt.Sprintf("opendax/%s/versions.yaml", cnf.Branch)
+	}
 	// Remove existing git folder
 	if err := os.RemoveAll(tmp); err != nil {
 		panic(err)
@@ -31,9 +35,9 @@ func actionVersions() error {
 		Token:    cnf.Token,
 	}
 
-	repo, err := git.Clone(&cnf, &auth, "./tmp")
+	repo, err := git.Clone(&cnf, &auth, tmp)
 	fmt.Println("Loading the versions file")
-	v, err := versions.Load(tmp + Path)
+	v, err := versions.Load(fmt.Sprintf("%s/%s", tmp, Path))
 	if err != nil {
 		panic(err)
 	}
