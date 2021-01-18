@@ -13,8 +13,9 @@ type Config struct {
 	Username string `env:"GIT_USERNAME" env-default:"kite-bot" env-description:"Git username"`
 	Email    string `env:"GIT_EMAIL" env-default:"kite-bot@heliostech.fr" env-description:"Git user email"`
 	Token    string `env:"GIT_TOKEN" env-description:"Git access token"`
-	Repo     string `env:"GIT_REPO" env-default:"https://github.com/openware/versions.git" env-description:"Git repository url"`
-	Branch   string `env:"DRONE_BRANCH" env-default:"2-6-stable" env-description:"Drone target branch"`
+	URL      string `env:"GIT_URL" env-default:"https://github.com/openware/versions.git" env-description:"Git repository url"`
+	Branch   string `env:"DRONE_BRANCH" env-default:"2-6-stable" env-description:"drone target branch"`
+	Repo     string `env:"DRONE_REPO_NAME" env-description:"component repo name"`
 }
 
 // Auth to describe auth method
@@ -46,7 +47,7 @@ func (a *AuthToken) Method() transport.AuthMethod {
 func Clone(cnf *Config, auth Auth, outDir string) (*git.Repository, error) {
 	repo, err := git.PlainClone(outDir, false, &git.CloneOptions{
 		Auth:     auth.Method(),
-		URL:      cnf.Repo,
+		URL:      cnf.URL,
 		Progress: os.Stdout,
 	})
 	if err != nil {
