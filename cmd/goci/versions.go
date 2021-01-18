@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/openware/goci/git"
 	"github.com/openware/goci/versions"
@@ -38,6 +39,10 @@ func actionVersions() error {
 	}
 
 	repo, err := git.Clone(&cnf, &auth, tmp)
+	if err != nil {
+		panic(err)
+	}
+
 	fmt.Println("Loading the versions file")
 	v, err := versions.Load(fmt.Sprintf("%s/%s", tmp, Path))
 	if err != nil {
@@ -45,7 +50,7 @@ func actionVersions() error {
 	}
 
 	if Tag == "" {
-		// Read .tag if exist to get tag version
+		// Read .tags if exists to get tag version
 		Tag, err = getTag()
 		if err != nil {
 			panic(errors.New("Tag is missing"))
@@ -60,7 +65,7 @@ func actionVersions() error {
 
 	// Commit & Push global OpenDAX versions
 	fmt.Println("Commit & Push global OpenDAX versions")
-	hash, err := git.Update(repo, &auth, "Update versions")
+	hash, err := git.Update(repo, &auth, fmt.Sprintf("%s: Update %s version to %s", cnf.Branch, Component, Tag))
 	if err == nil {
 		fmt.Printf("Pushed with commit hash: %s", hash)
 	}
@@ -68,9 +73,9 @@ func actionVersions() error {
 }
 
 func getTag() (string, error) {
-	val, err := ioutil.ReadFile(".tag")
+	val, err := ioutil.ReadFile(".tags")
 	if err == nil {
-		return string(val), nil
+		return strings.TrimSuffix(string(val), "\n"), nil
 	}
 	return "", err
 }

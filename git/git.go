@@ -3,7 +3,7 @@ package git
 import (
 	"os"
 
-	"github.com/go-git/go-git/v5"
+	git "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 )
@@ -14,7 +14,7 @@ type Config struct {
 	Email    string `env:"GIT_EMAIL" env-default:"kite-bot@heliostech.fr" env-description:"Git user email"`
 	Token    string `env:"GIT_TOKEN" env-description:"Git access token"`
 	Repo     string `env:"GIT_REPO" env-default:"https://github.com/openware/versions.git" env-description:"Git repository url"`
-	Branch   string `env:"DRONE_BRANCH" env-default:"2-6" env-description:"Drone target branch"`
+	Branch   string `env:"DRONE_BRANCH" env-default:"2-6-stable" env-description:"Drone target branch"`
 }
 
 // Auth to describe auth method
@@ -49,6 +49,10 @@ func Clone(cnf *Config, auth Auth, outDir string) (*git.Repository, error) {
 		URL:      cnf.Repo,
 		Progress: os.Stdout,
 	})
+	if err != nil {
+		return nil, err
+	}
+
 	cfg, err := repo.Config()
 	if err != nil {
 		return nil, err

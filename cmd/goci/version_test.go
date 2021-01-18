@@ -11,9 +11,9 @@ import (
 
 func TestGetTagByFile(t *testing.T) {
 	tag := "1.0.0"
-	ioutil.WriteFile("./.tag", []byte(tag), 0644)
+	ioutil.WriteFile("./.tags", []byte(tag), 0644)
 	val, err := getTag()
-	os.Remove("./.tag")
+	os.Remove("./.tags")
 	require.NoError(t, err)
 	assert.ObjectsAreEqual(tag, val)
 }
