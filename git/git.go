@@ -59,8 +59,8 @@ func Clone(cnf *Config, auth Auth, outDir string) (*git.Repository, error) {
 	return repo, err
 }
 
-// Bump for git add, commit and push
-func Bump(repo *git.Repository, auth Auth, msg string) (hash string, err error) {
+// Update for git add, commit and push
+func Update(repo *git.Repository, auth Auth, msg string) (hash string, err error) {
 	// worktree of the project using the go standard library
 	w, err := repo.Worktree()
 	if err != nil {

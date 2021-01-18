@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 
 	"github.com/openware/goci/git"
@@ -42,6 +44,14 @@ func actionVersions() error {
 		panic(err)
 	}
 
+	if Tag == "" {
+		// Read .tag if exist to get tag version
+		Tag, err = getTag()
+		if err != nil {
+			panic(errors.New("Tag is missing"))
+		}
+	}
+
 	fmt.Println("Setting " + Component + " to " + Tag)
 	v.SetTag(Component, Tag)
 
@@ -50,9 +60,17 @@ func actionVersions() error {
 
 	// Commit & Push global OpenDAX versions
 	fmt.Println("Commit & Push global OpenDAX versions")
-	hash, err := git.Bump(repo, &auth, "Bump versions")
+	hash, err := git.Update(repo, &auth, "Update versions")
 	if err == nil {
 		fmt.Printf("Pushed with commit hash: %s", hash)
 	}
 	return err
+}
+
+func getTag() (string, error) {
+	val, err := ioutil.ReadFile(".tag")
+	if err == nil {
+		return string(val), nil
+	}
+	return "", err
 }
