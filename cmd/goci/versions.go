@@ -29,7 +29,7 @@ func actionVersions() error {
 		panic(err)
 	}
 
-	fmt.Printf("Clone the repository `%s`\n", cnf.Repo)
+	fmt.Printf("Cloning the repository `%s`\n", cnf.URL)
 	fmt.Printf("Username: %s\n", cnf.Username)
 	fmt.Printf("Email: %s\n", cnf.Email)
 
@@ -57,17 +57,21 @@ func actionVersions() error {
 		}
 	}
 
+	if Component == "" {
+		Component = cnf.Repo
+	}
+
 	fmt.Println("Setting " + Component + " to " + Tag)
 	v.SetTag(Component, Tag)
 
 	fmt.Println("Saving the versions file")
 	v.Save()
 
-	// Commit & Push global OpenDAX versions
-	fmt.Println("Commit & Push global OpenDAX versions")
+	// Commit & Push to global OpenDAX versions
+	fmt.Println("Committing & Pushing to global OpenDAX versions")
 	hash, err := git.Update(repo, &auth, fmt.Sprintf("%s: Update %s version to %s", cnf.Branch, Component, Tag))
 	if err == nil {
-		fmt.Printf("Pushed with commit hash: %s", hash)
+		fmt.Printf("Pushed with commit hash: %s\n", hash)
 	}
 	return err
 }
