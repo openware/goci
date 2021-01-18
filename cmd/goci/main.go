@@ -11,7 +11,7 @@ import (
 var Version = "SNAPSHOT"
 
 // Path to versions file
-var Path = "opendax/2-6/versions.yaml"
+var Path string
 
 // Component name
 var Component = "peatio"
