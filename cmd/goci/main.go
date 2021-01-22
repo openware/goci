@@ -14,7 +14,7 @@ var Version = "SNAPSHOT"
 var Path string
 
 // Component name
-var Component = "peatio"
+var Component string
 
 // Tag of the component
 var Tag string
