@@ -26,6 +26,9 @@ steps:
       api_key:
         from_secret: kite_bot_key
       files: bin/*
+    when:
+        event:
+          - tag
 
   - name: Build container
     image: plugins/docker
@@ -40,5 +43,6 @@ steps:
 trigger:
   event:
     - push
+    - tag
   branch:
     - master
