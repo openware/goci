@@ -18,7 +18,18 @@ steps:
       - git fetch --tags authenticated-origin
       - bump patch --allow-dirty > .tags
       - git push authenticated-origin --tags
+    when:
+      event:
+        - push
+
+  - name: Build binary
+    image: golang:1.14
+    commands:
+      - echo $DRONE_TAG > .tags
       - make all
+    when:
+      event:
+        - tag
 
   - name: publish
     image: plugins/github-release
@@ -27,8 +38,8 @@ steps:
         from_secret: kite_bot_key
       files: bin/*
     when:
-        event:
-          - tag
+      event:
+        - tag
 
   - name: Build container
     image: plugins/docker
@@ -39,6 +50,9 @@ steps:
         from_secret: quay_password
       repo: quay.io/openware/goci
       registry: quay.io
+    when:
+      event:
+        - push
 
 trigger:
   event:
