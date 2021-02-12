@@ -18,6 +18,14 @@ steps:
       - git fetch --tags authenticated-origin
       - bump patch --allow-dirty > .tags
       - git push authenticated-origin --tags
+      - make all
+
+  - name: publish
+    image: plugins/github-release
+    settings:
+      api_key:
+        from_secret: kite_bot_key
+      files: bin/*
 
   - name: Build container
     image: plugins/docker
