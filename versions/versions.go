@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -17,17 +18,29 @@ type Versions struct {
 
 // Load values.yaml
 func Load(filename string) (*Versions, error) {
-	dat, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
+	var v Versions
 
-	v := Versions{
-		data:     make(map[string]interface{}),
-		filename: filename,
-	}
-	err = yaml.Unmarshal(dat, v.data)
-	if err != nil {
+	if _, err := os.Stat(filename); err == nil {
+		dat, err := ioutil.ReadFile(filename)
+		if err != nil {
+			return nil, err
+		}
+
+		v := Versions{
+			data:     make(map[string]interface{}),
+			filename: filename,
+		}
+		err = yaml.Unmarshal(dat, v.data)
+		if err != nil {
+			return nil, err
+		}
+	} else if os.IsNotExist(err) {
+		fmt.Printf("%s doesn't exist, initializing empty versions\n", filename)
+		v = Versions{
+			data:     make(map[string]interface{}),
+			filename: filename,
+		}
+	} else {
 		return nil, err
 	}
 
@@ -36,7 +49,15 @@ func Load(filename string) (*Versions, error) {
 
 // SetTag is a helper to set a tag for a given component
 func (v *Versions) SetTag(component, value string) {
-	v.data[component].(map[string]interface{})["image"].(map[string]interface{})["tag"] = value
+	if v.data[component] == nil {
+		v.data[component] = map[string]interface{}{
+			"image": map[string]interface{}{
+				"tag": value,
+			},
+		}
+	} else {
+		v.data[component].(map[string]interface{})["image"].(map[string]interface{})["tag"] = value
+	}
 }
 
 // Save dump the values in yaml to the file

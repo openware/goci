@@ -22,7 +22,7 @@ func actionVersions() error {
 	tmp := "./tmp"
 	// Path to versions file
 	if Path == "" {
-		Path = fmt.Sprintf("opendax/%s/versions.yaml", cnf.Branch)
+		Path = fmt.Sprintf("%s/opendax/%s/versions.yaml", tmp, cnf.Branch)
 	}
 	// Remove existing git folder
 	if err := os.RemoveAll(tmp); err != nil {
@@ -43,8 +43,15 @@ func actionVersions() error {
 		panic(err)
 	}
 
+	// Create the version directory if it doesn't exist
+	dir := strings.Split(Path, "/")
+	err = os.MkdirAll(strings.Join(dir[:len(dir)-1], "/"), os.ModePerm)
+	if err != nil {
+		panic(err)
+	}
+
 	fmt.Println("Loading the versions file")
-	v, err := versions.Load(fmt.Sprintf("%s/%s", tmp, Path))
+	v, err := versions.Load(Path)
 	if err != nil {
 		panic(err)
 	}
@@ -53,7 +60,7 @@ func actionVersions() error {
 		// Read .tags if exists to get tag version
 		Tag, err = getTag()
 		if err != nil {
-			panic(errors.New("Tag is missing"))
+			panic(errors.New("tag is missing"))
 		}
 	}
 
