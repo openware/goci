@@ -26,10 +26,11 @@ func Load(filename string) (*Versions, error) {
 			return nil, err
 		}
 
-		v := Versions{
+		v = Versions{
 			data:     make(map[string]interface{}),
 			filename: filename,
 		}
+
 		err = yaml.Unmarshal(dat, v.data)
 		if err != nil {
 			return nil, err
