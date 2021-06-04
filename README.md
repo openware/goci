@@ -14,3 +14,4 @@ This will do the following:
 2. Update `opendax/2-6/versions.yaml` component tag
 3. Commit and push the updates
 
+To display all files updated in the latest Git commit, run `goci -depth 1 changes`, where depth is the depth of directories you'd like to use(dir1/dir2/...dirn)
