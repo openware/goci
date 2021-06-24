@@ -53,8 +53,20 @@ func actionChanges() error {
 			}
 		}
 
-		fmt.Printf("%s\n", strings.Join(res, " "))
+		fmt.Printf("%s\n", strings.Join(filterUnique(res), " "))
 	}
 
 	return nil
+}
+
+func filterUnique(changes []string) []string {
+	keys := make(map[string]bool)
+	list := []string{}
+	for _, entry := range changes {
+		if _, value := keys[entry]; !value {
+			keys[entry] = true
+			list = append(list, entry)
+		}
+	}
+	return list
 }
