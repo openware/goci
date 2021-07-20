@@ -23,6 +23,8 @@ func actionVersions() error {
 	// Path to versions file
 	if Path == "" {
 		Path = fmt.Sprintf("%s/opendax/%s/versions.yaml", tmp, cnf.Branch)
+	} else {
+		Path = strings.Join([]string{tmp, Path}, "/")
 	}
 	// Remove existing git folder
 	if err := os.RemoveAll(tmp); err != nil {
