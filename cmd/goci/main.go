@@ -19,6 +19,8 @@ var Component string
 // Tag of the component
 var Tag string
 
+var CommitMessage string
+
 // Changed file display depth(dir1/dir2/.../dir*depth*)
 var Depth = 0
 
@@ -29,6 +31,7 @@ func main() {
 	cli.StringFlag("path", "Path to the versions folder (e.g. opendax/2-6/versions.yaml)", &Path)
 	cli.StringFlag("component", "Name of the component to update", &Component)
 	cli.StringFlag("tag", "Tag to insert into the versions file", &Tag)
+	cli.StringFlag("message", "Commit message", &CommitMessage)
 	cli.AddCommand(cmdVersions)
 
 	cmdChanges := kli.NewCommand("changes", "List files changed in the last commit").Action(actionChanges)

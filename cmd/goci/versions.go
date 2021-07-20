@@ -23,6 +23,8 @@ func actionVersions() error {
 	// Path to versions file
 	if Path == "" {
 		Path = fmt.Sprintf("%s/opendax/%s/versions.yaml", tmp, cnf.Branch)
+	} else {
+		Path = strings.Join([]string{tmp, Path}, "/")
 	}
 	// Remove existing git folder
 	if err := os.RemoveAll(tmp); err != nil {
@@ -75,8 +77,12 @@ func actionVersions() error {
 	v.Save()
 
 	// Commit & Push to global OpenDAX versions
-	fmt.Println("Committing & Pushing to global OpenDAX versions")
-	hash, err := git.Update(repo, &auth, fmt.Sprintf("%s: Update %s version to %s", cnf.Branch, Component, Tag))
+	fmt.Println("Committing & Pushing to remote repository")
+	if CommitMessage == "" {
+		CommitMessage = fmt.Sprintf("%s: Update %s version to %s", cnf.Branch, Component, Tag)
+	}
+
+	hash, err := git.Update(repo, &auth, CommitMessage)
 	if err == nil {
 		fmt.Printf("Pushed with commit hash: %s\n", hash)
 	}
