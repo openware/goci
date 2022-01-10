@@ -28,33 +28,35 @@ func actionChanges() error {
 		return err
 	}
 
-	var changedFiles []string
+	var paths []string
 
 	for _, stat := range stats {
-		changedFiles = append(changedFiles, stat.Name)
+		paths = append(paths, stat.Name)
 	}
 
-	if Depth == 0 {
-		fmt.Printf("%s\n", strings.Join(changedFiles, " "))
-	} else {
-		var res []string
-		keys := make(map[string]int)
-
-		for _, f := range changedFiles {
-			if _, ok := keys[f]; !ok {
-				keys[f] = 1
-				filepath := strings.Split(f, "/")
-
-				if len(filepath) >= Depth {
-					filepath = filepath[0:Depth]
-				}
-
-				res = append(res, strings.Join(filepath, "/"))
-			}
-		}
-
-		fmt.Printf("%s\n", strings.Join(res, " "))
+	if Depth > 0 {
+		paths = filterUnique(paths, Depth)
 	}
+	fmt.Printf("%s\n", strings.Join(paths, " "))
 
 	return nil
+}
+
+func filterUnique(changes []string, depth int) []string {
+	var paths []string
+	keys := make(map[string]int)
+
+	for _, f := range changes {
+		filepath := strings.Split(f, "/")
+		if len(filepath) >= depth {
+			filepath = filepath[0:depth]
+		}
+
+		path := strings.Join(filepath, "/")
+		if _, ok := keys[path]; !ok {
+			keys[path] = 1
+			paths = append(paths, path)
+		}
+	}
+	return paths
 }
