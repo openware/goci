@@ -3,13 +3,50 @@ kind: pipeline
 name: default
 
 steps:
+  - name: Go test
+    image: golang:1.18
+    environment:
+      GO111MODULE: "on"
+      COVER_OUT: cover.out
+    commands:
+      - go clean -testcache
+      - go test ./... --cover -coverprofile $COVER_OUT
+
+  - name: Go coverage
+    image: golang:1.18
+    environment:
+      GO111MODULE: "on"
+      COVER_OUT: cover.out
+      ANALYTICS_DATABASE_HOST: pg.opendax.app
+      ANALYTICS_DATABASE_PORT: 30432
+      ANALYTICS_DATABASE_USERNAME: postgres
+      ANALYTICS_DATABASE_USERNAME: coverage_analytics
+      ANALYTICS_DATABASE_PASSWORD:
+        from_secret: pgpass_coverage
+      ANALYTICS_DATABASE_NAME: coverage_analytics
+      ANALYTICS_COMPONENT: goci
+    commands:
+      - apt-get update
+      - apt-get install -y p7zip-full
+      - |
+        curl -s -L "https://github.com/boumenot/gocover-cobertura/releases/download/v1.1.0/gocover-cobertura.linux.x64.7z" -o ./gocover-cobertura.7z
+        curl -s -L https://github.com/openware/go-coverage/releases/download/v1.0.0-alpha/go-coverage -o ./go-coverage
+        7z x ./gocover-cobertura.7z
+        chmod +x ./gocover-cobertura
+        chmod +x ./go-coverage
+      - ./gocover-cobertura < $COVER_OUT > coverage.xml
+      - ./go-coverage coverage.xml
+    when:
+      event:
+        - tag
+
   - name: Bump and tag
     image: golang:1.14
     environment:
       GITHUB_API_KEY:
-        from_secret: github_api_key
+        from_secret: gh_api_key
       GITHUB_API_USER:
-        from_secret: github_api_user
+        from_secret: gh_api_user
     commands:
       - git config --global user.name "Kite Bot"
       - git config --global user.email "kite-bot@heliostech.fr"
@@ -21,6 +58,8 @@ steps:
     when:
       event:
         - push
+      branch:
+        - master
 
   - name: Build binary
     image: golang:1.14
@@ -30,16 +69,20 @@ steps:
     when:
       event:
         - tag
+      branch:
+        - master
 
-  - name: publish
+  - name: Publish
     image: plugins/github-release
     settings:
       api_key:
-        from_secret: kite_bot_key
+        from_secret: gh_api_key
       files: bin/*
     when:
       event:
         - tag
+      branch:
+        - master
 
   - name: Build container
     image: plugins/docker
@@ -53,10 +96,10 @@ steps:
     when:
       event:
         - push
+      branch:
+        - master
 
 trigger:
   event:
     - push
     - tag
-  branch:
-    - master
